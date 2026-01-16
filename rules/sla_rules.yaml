@@ -1,0 +1,5 @@
+﻿default_sla_hours: 24
+critical_sla_hours: 2
+high_sla_hours: 6
+medium_sla_hours: 12
+low_sla_hours: 24

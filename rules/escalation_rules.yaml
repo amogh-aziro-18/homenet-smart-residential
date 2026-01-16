@@ -1,0 +1,4 @@
+﻿escalate_if_sla_breach: true
+escalation_contacts:
+  - role: facility_manager
+    channel: app_notification

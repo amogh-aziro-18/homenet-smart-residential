@@ -1,0 +1,35 @@
+﻿# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.env
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Logs
+*.log
+*.tmp
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Model artifacts (keep folder, ignore files)
+models/**/artifacts/*
+!models/**/artifacts/.gitkeep
+
+# Node / Expo
+node_modules/
+.expo/
+.expo-shared/
+web-build/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
