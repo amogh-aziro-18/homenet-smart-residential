@@ -1,5 +1,8 @@
-HOMENET – Smart Residential Network Manager
+﻿# HOMENET – Smart Residential Network Manager (POC)
 
-Proof of Concept for monitoring residential assets (water, power, elevators),
-predicting demand and failures, and coordinating maintenance using a
-multi-agent architecture and predictive ML.
+HOMENET is a Proof of Concept (POC) for monitoring residential complex assets (water, power, elevators, safety),
+predicting demand/failure risks, and coordinating maintenance actions via multi-agent reasoning and predictive ML.
+
+## Repo Notes
+- This repo contains placeholder boilerplates to enable parallel development.
+- Do not rename integration functions mentioned in docs/INTEGRATION_RULES.md.

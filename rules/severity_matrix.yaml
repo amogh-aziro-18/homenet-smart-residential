@@ -1,0 +1,4 @@
+﻿pump_failure_risk:
+  HIGH: critical
+  MEDIUM: high
+  LOW: medium
