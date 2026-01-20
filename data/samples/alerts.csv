@@ -1,9 +1,16 @@
 alert_id,timestamp,building_id,asset_id,asset_type,alert_type,severity,description
-ALERT_001,2025-10-11 10:00:00,BLD_001,PUMP_BLD001_01,pump,pump_failure,critical,Pump bearing failure - complete shutdown
-ALERT_002,2025-10-12 14:00:00,BLD_002,PUMP_BLD002_01,pump,pump_failure,critical,Sudden pump seal rupture
-ALERT_003,2025-10-10 08:00:00,BLD_001,PUMP_BLD001_01,pump,high_vibration,high,Vibration exceeded threshold
-ALERT_004,2025-10-08 09:00:00,BLD_001,PUMP_BLD001_02,pump,high_vibration,medium,Elevated vibration detected
-ALERT_005,2025-10-09 15:00:00,BLD_001,PUMP_BLD001_01,pump,high_temperature,medium,Temperature exceeded 65C
-ALERT_006,2025-10-09 06:00:00,BLD_001,TANK_BLD001_01,tank,low_tank_level,high,Tank level below 30%
-ALERT_007,2025-10-07 12:00:00,BLD_001,UNIT_BLD001_102,unit,high_consumption,medium,Possible leak detected
-ALERT_008,2025-10-08 10:00:00,BLD_001,PUMP_BLD001_02,pump,preventive_maintenance,low,Scheduled maintenance due
+ALERT_001,2025-10-06 14:30:00,BLD_001,PUMP_BLD_001_01,pump,high_vibration,low,Vibration slightly elevated: 4.8 mm/s (threshold: 4.5)
+ALERT_002,2025-10-07 16:00:00,BLD_001,PUMP_BLD_001_01,pump,high_vibration,medium,Vibration elevated: 5.9 mm/s
+ALERT_003,2025-10-08 10:15:00,BLD_001,PUMP_BLD_001_01,pump,high_vibration,high,Vibration critical: 7.2 mm/s - immediate inspection required
+ALERT_004,2025-10-08 10:20:00,BLD_001,PUMP_BLD_001_01,pump,high_temperature,medium,Temperature elevated: 63°C (threshold: 60°C)
+ALERT_005,2025-10-09 12:00:00,BLD_001,PUMP_BLD_001_01,pump,high_vibration,critical,Vibration very high: 8.5 mm/s - bearing failure imminent
+ALERT_006,2025-10-09 12:05:00,BLD_001,PUMP_BLD_001_01,pump,high_temperature,high,Temperature critical: 67°C
+ALERT_007,2025-10-11 08:00:00,BLD_001,PUMP_BLD_001_01,pump,pump_failure,critical,Pump complete failure - bearing seized
+ALERT_008,2025-10-08 09:30:00,BLD_001,PUMP_BLD_001_02,pump,high_vibration,medium,Vibration spike detected: 7.5 mm/s
+ALERT_009,2025-10-08 15:00:00,BLD_001,PUMP_BLD_001_02,pump,preventive_maintenance,medium,Preventive maintenance recommended - vibration anomaly detected
+ALERT_010,2025-10-11 16:00:00,BLD_002,PUMP_BLD_002_01,pump,high_vibration,medium,Vibration elevated: 5.5 mm/s
+ALERT_011,2025-10-12 10:30:00,BLD_002,PUMP_BLD_002_01,pump,high_vibration,high,Vibration high: 6.8 mm/s
+ALERT_012,2025-10-12 14:15:00,BLD_002,PUMP_BLD_002_01,pump,pump_failure,critical,Sudden pump seal rupture - immediate shutdown
+ALERT_013,2025-10-09 06:00:00,BLD_001,TANK_BLD_001_01,tank,low_tank_level,high,Tank level critically low: 22% (pump failure upstream)
+ALERT_014,2025-10-07 12:00:00,BLD_001,UNIT_BLD_001_102,unit,high_consumption,medium,Abnormally high consumption detected - possible leak
+ALERT_015,2025-10-09 08:00:00,BLD_001,UNIT_BLD_001_102,unit,high_consumption,high,Sustained high consumption for 3 days - leak investigation required
