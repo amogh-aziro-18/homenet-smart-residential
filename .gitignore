@@ -36,9 +36,11 @@ Thumbs.db
 
 # Local databases
 *.db
+homenet_water.db
 
 # Local output artifacts
 out_*.json
 
 # Python cache
 __pycache__/
+.env
