@@ -1,14 +1,54 @@
+# -------------------------
+# Core Data & ML
+# -------------------------
 pandas==2.1.4
 numpy==1.26.2
-matplotlib==3.8.2
-seaborn==0.13.0
 scikit-learn==1.3.2
 xgboost==2.0.3
-langchain==0.1.0
-langgraph==0.0.20
-pyyaml==6.0.1
-pytest==7.4.3
+
+# -------------------------
+# Forecasting
+# -------------------------
+prophet
+cmdstanpy
+
+# -------------------------
+# Visualization (used in training / debugging)
+# -------------------------
+matplotlib==3.8.2
+seaborn==0.13.0
+
+# -------------------------
+# Backend API
+# -------------------------
 fastapi==0.108.0
 uvicorn==0.25.0
 pydantic==2.5.3
 python-dotenv==1.0.0
+
+# -------------------------
+# Database (SQLite via SQLAlchemy)
+# -------------------------
+sqlalchemy
+
+# -------------------------
+# Agents / Reasoning (Vade + you)
+# -------------------------
+langchain==0.1.0
+langgraph==0.0.20
+
+# -------------------------
+# Rules / Config
+# -------------------------
+pyyaml==6.0.1
+
+# -------------------------
+# Utilities
+# -------------------------
+python-dateutil
+requests
+
+# -------------------------
+# Testing
+# -------------------------
+pytest==7.4.3
