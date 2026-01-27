@@ -33,3 +33,12 @@ web-build/
 Thumbs.db
 .vscode/
 .idea/
+
+# Local databases
+*.db
+
+# Local output artifacts
+out_*.json
+
+# Python cache
+__pycache__/
