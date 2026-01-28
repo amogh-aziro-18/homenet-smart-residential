@@ -1,5 +1,73 @@
-﻿default_sla_hours: 24
-critical_sla_hours: 2
-high_sla_hours: 6
-medium_sla_hours: 12
-low_sla_hours: 24
+﻿# SLA Rules for HOMENET POC
+# Defines Service Level Agreements for different priority levels
+
+sla_hours:
+  CRITICAL: 2
+  HIGH: 6
+  MEDIUM: 12
+  LOW: 24
+  default: 24
+
+# SLA by Task Type
+task_type_sla:
+  pump_failure:
+    CRITICAL: 2
+    HIGH: 4
+    MEDIUM: 8
+    LOW: 24
+    
+  capacity_alert:
+    CRITICAL: 2
+    HIGH: 6
+    MEDIUM: 12
+    LOW: 24
+    
+  maintenance_inspection:
+    CRITICAL: 4
+    HIGH: 8
+    MEDIUM: 24
+    LOW: 48
+    
+  routine_checkup:
+    CRITICAL: 6
+    HIGH: 12
+    MEDIUM: 24
+    LOW: 72
+
+# Response Time Expectations (minutes)
+response_time_minutes:
+  CRITICAL: 5   # Must acknowledge within 5 minutes
+  HIGH: 15      # Must acknowledge within 15 minutes
+  MEDIUM: 60    # Must acknowledge within 1 hour
+  LOW: 240      # Must acknowledge within 4 hours
+
+# Resolution Time (hours)
+resolution_time_hours:
+  CRITICAL: 2   # Must resolve within 2 hours
+  HIGH: 6       # Must resolve within 6 hours
+  MEDIUM: 12    # Must resolve within 12 hours
+  LOW: 24       # Must resolve within 24 hours
+
+# SLA Breach Actions
+breach_actions:
+  auto_escalate: true
+  notify_management: true
+  log_incident: true
+  
+  escalation_delay_hours:
+    first_escalation: 0.5   # 30 minutes after SLA breach
+    second_escalation: 1.0  # 1 hour after first escalation
+    final_escalation: 2.0   # 2 hours - notify operations head
+
+# Working Hours (24/7 for critical infrastructure)
+working_hours:
+  enabled: true
+  type: "24/7"  # Always on for residential infrastructure
+  
+business_hours:
+  weekday_start: "08:00"
+  weekday_end: "18:00"
+  weekend_start: "09:00"
+  weekend_end: "17:00"
+  
+after_hours_multiplier: 1.5  # SLA extended by 1.5x after business hours (for LOW priority only)

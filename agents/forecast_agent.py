@@ -1,5 +1,6 @@
 ﻿"""
 Forecast Agent - LLM-powered demand forecasting analysis with LangGraph
+INTEGRATED WITH AMOGH'S ML MODEL
 """
 import sys
 import os
@@ -15,7 +16,7 @@ from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 
 def forecast_agent_node(state: AgentState) -> dict:
     """
-    LLM-powered Forecast Agent with reasoning
+    LLM-powered Forecast Agent with REAL ML predictions
     Analyzes demand forecasts and makes capacity decisions
     """
     building_id = state.get("building_id")
@@ -29,38 +30,55 @@ def forecast_agent_node(state: AgentState) -> dict:
     }
     
     try:
-        # Mock demand forecast (replace with Amogh's ML model later)
-        # Simulate realistic demand patterns
-        current_hour = datetime.now().hour
+        # ✅ IMPORT AND USE AMOGH'S REAL ML MODEL
+        from models.demand_forecast.predict import forecast_water_demand
         
-        # Peak hours: 7-9 AM and 6-9 PM
-        if current_hour in [7, 8, 19, 20]:
-            current_demand = 85
-            predicted_demand = 95
-        elif current_hour in [9, 18, 21]:
-            current_demand = 75
-            predicted_demand = 88
-        else:
-            current_demand = 60
-            predicted_demand = 65
+        # Get real ML forecast
+        ml_forecast = forecast_water_demand(asset_id=building_id, horizon_hours=24)
         
-        peak_time = datetime.now() + timedelta(hours=2)
+        # Extract ML predictions
+        forecast_total = ml_forecast.get("forecast_total", 0)
+        demand_level = ml_forecast.get("demand_level", "UNKNOWN")  # HIGH/MEDIUM/LOW
+        peak_hour = ml_forecast.get("peak_hour", {})
+        peak_value = peak_hour.get("value", 0) if peak_hour else 0
+        peak_time_str = peak_hour.get("timestamp", "N/A") if peak_hour else "N/A"
+        recommendation = ml_forecast.get("recommendation", "No recommendation")
+        
+        # Calculate capacity percentages (adjust MAX_CAPACITY based on your system)
+        MAX_CAPACITY_PER_HOUR = 500  # liters per hour (adjust to your tank capacity)
+        current_demand = min(100, int((forecast_total / 24) / MAX_CAPACITY_PER_HOUR * 100))
+        predicted_demand = min(100, int(peak_value / MAX_CAPACITY_PER_HOUR * 100))
+        
+        # Parse peak time
+        try:
+            peak_time = datetime.fromisoformat(peak_time_str) if peak_time_str != "N/A" else datetime.now() + timedelta(hours=2)
+        except:
+            peak_time = datetime.now() + timedelta(hours=2)
         
         updates.update({
             "current_demand": current_demand,
             "predicted_demand": predicted_demand,
             "peak_time": peak_time.isoformat(),
+            "forecast_total": forecast_total,
+            "demand_level": demand_level,
+            "ml_recommendation": recommendation,
         })
         
-        # Use LLM for intelligent reasoning
+        # Use LLM for intelligent reasoning based on REAL ML data
         llm = get_llm()
         
         prompt = f"""You are an AI demand forecasting agent analyzing water demand capacity.
 
 BUILDING: {building_id}
-CURRENT DEMAND: {current_demand}% of capacity
-PREDICTED DEMAND: {predicted_demand}% of capacity
-PREDICTED PEAK TIME: {peak_time.strftime('%H:%M')}
+
+ML FORECAST RESULTS:
+- Total 24h Demand: {forecast_total:.2f} liters
+- Demand Level: {demand_level}
+- Peak Hour: {peak_time.strftime('%Y-%m-%d %H:%M')}
+- Peak Value: {peak_value:.2f} liters
+- Current Avg Demand: {current_demand}% of hourly capacity
+- Predicted Peak Demand: {predicted_demand}% of hourly capacity
+- ML Recommendation: {recommendation}
 
 CAPACITY THRESHOLDS:
 - 95%+ : Critical - immediate action required
@@ -68,7 +86,7 @@ CAPACITY THRESHOLDS:
 - 70-84% : Medium - enhanced monitoring
 - <70% : Normal - standard monitoring
 
-Based on this data, decide:
+Based on this REAL ML forecast data, decide:
 1. ACTION_REQUIRED: true/false
 2. ACTION_TYPE: capacity_alert | capacity_monitoring | enhanced_monitoring | none
 3. PRIORITY: CRITICAL | HIGH | MEDIUM | LOW
@@ -125,7 +143,7 @@ REASONING: [your reasoning]
                 task = {
                     "task_id": task_id,
                     "title": f"{priority}: Capacity Alert - {building_id}",
-                    "description": f"Predicted demand: {predicted_demand}% at {peak_time.strftime('%H:%M')}. Current: {current_demand}%. {reasoning}",
+                    "description": f"ML Forecast: {forecast_total:.2f}L/24h, Peak: {peak_value:.2f}L at {peak_time.strftime('%H:%M')}. Demand level: {demand_level}. {reasoning}",
                     "priority": priority,
                     "sla_hours": sla_hours,
                     "action_type": action_type,
@@ -134,14 +152,21 @@ REASONING: [your reasoning]
                 updates["tasks"] = state.get("tasks", []) + [task]
                 updates["task_title"] = task["title"]
                 updates["task_description"] = task["description"]
-                updates["messages"] = updates["messages"] + [AIMessage(content=f"⚠️ {priority}: {building_id} capacity alert ({predicted_demand}%)")]
+                updates["messages"] = updates["messages"] + [AIMessage(content=f"⚠️ {priority}: {building_id} capacity alert ({demand_level})")]
             else:
                 updates["messages"] = updates["messages"] + [AIMessage(content=f"ℹ️ Forecast task already exists for {building_id}")]
         else:
             updates["task_title"] = None
             updates["task_description"] = None
-            updates["messages"] = updates["messages"] + [AIMessage(content=f"✅ {building_id} demand normal ({predicted_demand}%)")]
+            updates["messages"] = updates["messages"] + [AIMessage(content=f"✅ {building_id} demand normal ({demand_level})")]
     
+    except FileNotFoundError as e:
+        # Model not trained yet
+        updates.update({
+            "action_required": False,
+            "next_agent": "supervisor",
+            "messages": updates["messages"] + [AIMessage(content=f"⚠️ ML model not trained yet. Run: python models/demand_forecast/train.py")],
+        })
     except Exception as e:
         updates.update({
             "action_required": False,
@@ -177,6 +202,9 @@ def run_forecast_agent(building_id: str) -> dict:
         "current_demand": merged.get("current_demand"),
         "predicted_demand": merged.get("predicted_demand"),
         "peak_time": merged.get("peak_time"),
+        "forecast_total": merged.get("forecast_total"),
+        "demand_level": merged.get("demand_level"),
+        "ml_recommendation": merged.get("ml_recommendation"),
         "action_required": merged.get("action_required"),
         "action_type": merged.get("action_type"),
         "priority": merged.get("priority"),
@@ -188,9 +216,9 @@ def run_forecast_agent(building_id: str) -> dict:
 
 
 if __name__ == "__main__":
-    """Test the forecast agent"""
+    """Test the forecast agent with REAL ML"""
     print("="*70)
-    print("🤖 AI FORECAST AGENT TEST (with LLM)")
+    print("🤖 AI FORECAST AGENT TEST (with REAL ML + LLM)")
     print("="*70)
     
     buildings = ["BLD_001", "BLD_002"]
@@ -202,18 +230,21 @@ if __name__ == "__main__":
         
         result = run_forecast_agent(building_id)
         
-        print(f"Current Demand: {result['current_demand']}%")
-        print(f"Predicted Demand: {result['predicted_demand']}%")
-        print(f"Peak Time: {result['peak_time']}")
-        print(f"Action Required: {result['action_required']}")
-        print(f"Priority: {result['priority']}")
+        print(f"🔮 ML Forecast Total: {result.get('forecast_total', 'N/A')} liters/24h")
+        print(f"📊 Demand Level: {result.get('demand_level', 'N/A')}")
+        print(f"📈 Current Avg Demand: {result['current_demand']}%")
+        print(f"⚡ Predicted Peak: {result['predicted_demand']}%")
+        print(f"⏰ Peak Time: {result['peak_time']}")
+        print(f"💡 ML Recommendation: {result.get('ml_recommendation', 'N/A')}")
+        print(f"🚨 Action Required: {result['action_required']}")
+        print(f"🎯 Priority: {result['priority']}")
         print(f"\n🤖 LLM Reasoning: {result['reasoning']}")
         
         if result['task']:
-            print(f"\nTask Created:")
+            print(f"\n✅ Task Created:")
             print(f"  Title: {result['task']['title']}")
             print(f"  Description: {result['task']['description']}")
     
     print("\n" + "="*70)
-    print("✅ FORECAST AGENT TEST COMPLETE")
+    print("✅ FORECAST AGENT TEST COMPLETE (ML + LLM INTEGRATED)")
     print("="*70)

@@ -1,4 +1,108 @@
-﻿pump_failure_risk:
-  HIGH: critical
-  MEDIUM: high
-  LOW: medium
+﻿# Severity Matrix for HOMENET POC
+# Maps ML predictions and thresholds to priority levels
+
+# Pump Failure Risk Severity
+pump_failure:
+  risk_thresholds:
+    CRITICAL:
+      severity: CRITICAL
+      min_risk_score: 95.0
+      max_risk_score: 100.0
+      description: "Imminent pump failure - immediate action required"
+      
+    HIGH:
+      severity: HIGH
+      min_risk_score: 85.0
+      max_risk_score: 94.9
+      description: "High failure risk - prepare backup systems"
+      
+    MEDIUM:
+      severity: MEDIUM
+      min_risk_score: 70.0
+      max_risk_score: 84.9
+      description: "Elevated risk - enhanced monitoring needed"
+      
+    LOW:
+      severity: LOW
+      min_risk_score: 0.0
+      max_risk_score: 69.9
+      description: "Normal operation - standard monitoring"
+
+# Water Demand Capacity Severity
+capacity_alerts:
+  thresholds:
+    CRITICAL:
+      severity: CRITICAL
+      min_percent: 95
+      max_percent: 100
+      description: "Critical capacity - immediate refill/pumping required"
+      
+    HIGH:
+      severity: HIGH
+      min_percent: 85
+      max_percent: 94
+      description: "High demand - prepare tanker/backup"
+      
+    MEDIUM:
+      severity: MEDIUM
+      min_percent: 70
+      max_percent: 84
+      description: "Moderate demand - adjust pump schedules"
+      
+    LOW:
+      severity: LOW
+      min_percent: 0
+      max_percent: 69
+      description: "Normal demand - standard operation"
+
+# Vibration Alerts
+vibration_alerts:
+  thresholds:
+    CRITICAL:
+      severity: CRITICAL
+      min_value: 8.0
+      description: "Dangerous vibration - stop pump immediately"
+      
+    HIGH:
+      severity: HIGH
+      min_value: 5.0
+      max_value: 7.9
+      description: "High vibration - inspect bearings"
+      
+    MEDIUM:
+      severity: MEDIUM
+      min_value: 3.0
+      max_value: 4.9
+      description: "Elevated vibration - schedule inspection"
+      
+    LOW:
+      severity: LOW
+      min_value: 0.0
+      max_value: 2.9
+      description: "Normal vibration levels"
+
+# Temperature Alerts
+temperature_alerts:
+  thresholds:
+    CRITICAL:
+      severity: CRITICAL
+      min_celsius: 85
+      description: "Motor overheating - shutdown required"
+      
+    HIGH:
+      severity: HIGH
+      min_celsius: 75
+      max_celsius: 84
+      description: "High temperature - check cooling system"
+      
+    MEDIUM:
+      severity: MEDIUM
+      min_celsius: 65
+      max_celsius: 74
+      description: "Warm operation - monitor temperature"
+      
+    LOW:
+      severity: LOW
+      min_celsius: 0
+      max_celsius: 64
+      description: "Normal operating temperature"

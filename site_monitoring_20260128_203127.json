@@ -1,0 +1,16 @@
+{
+  "site_id": "SITE_001",
+  "timestamp": "2026-01-28T20:31:27.486183",
+  "summary": {
+    "total_analyzed": 0,
+    "total_tasks": 0,
+    "priority_breakdown": {
+      "CRITICAL": 0,
+      "HIGH": 0,
+      "MEDIUM": 0,
+      "LOW": 0
+    },
+    "technicians_assigned": 0
+  },
+  "tasks": []
+}

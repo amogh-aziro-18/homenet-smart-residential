@@ -1,4 +1,56 @@
-﻿escalate_if_sla_breach: true
-escalation_contacts:
-  - role: facility_manager
-    channel: app_notification
+﻿# Escalation Rules for HOMENET POC
+# Defines when and how to escalate tasks based on priority and SLA
+
+escalation:
+  enabled: true
+  auto_escalate_on_sla_breach: true
+  auto_escalate_after_hours: 2  # Re-escalate if no response after 2h
+  
+  contacts:
+    CRITICAL:
+      - role: facility_manager
+        name: "Facility Manager"
+        channel: app_notification
+        response_time_minutes: 5
+      - role: operations_head
+        name: "Operations Head"
+        channel: sms
+        response_time_minutes: 10
+        
+    HIGH:
+      - role: senior_technician
+        name: "Senior Technician"
+        channel: app_notification
+        response_time_minutes: 15
+      - role: facility_manager
+        name: "Facility Manager"
+        channel: sms
+        response_time_minutes: 30
+        
+    MEDIUM:
+      - role: duty_technician
+        name: "Duty Technician"
+        channel: app_notification
+        response_time_minutes: 60
+        
+    LOW:
+      - role: duty_technician
+        name: "Duty Technician"
+        channel: app_notification
+        response_time_minutes: 240
+
+escalation_chain:
+  level_1: duty_technician
+  level_2: senior_technician
+  level_3: facility_manager
+  level_4: operations_head
+
+notification_channels:
+  app_notification:
+    enabled: true
+    priority: high
+  sms:
+    enabled: true
+    priority: critical
+  email:
+    enabled: false  # Not implemented in POC
