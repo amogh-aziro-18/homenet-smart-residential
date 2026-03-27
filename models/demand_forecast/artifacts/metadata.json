@@ -1,0 +1,20 @@
+{
+  "trained_at": "2026-01-27T07:41:57.103892+00:00",
+  "data_path": "data/samples/water_consumption.csv",
+  "timestamp_col": "timestamp",
+  "target_col": "consumption_liters",
+  "group_col": "building_id",
+  "freq": "h",
+  "models": [
+    {
+      "group_value": "BLD_001",
+      "model_path": "models/demand_forecast/artifacts\\prophet_building_id_BLD_001.pkl",
+      "n_rows": 333
+    },
+    {
+      "group_value": "BLD_002",
+      "model_path": "models/demand_forecast/artifacts\\prophet_building_id_BLD_002.pkl",
+      "n_rows": 333
+    }
+  ]
+}

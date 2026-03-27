@@ -1,8 +1,8 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 import uuid
 
 
@@ -13,14 +13,19 @@ def _utc_now() -> str:
 def _make_id() -> str:
     return f"NOTIF_{uuid.uuid4().hex[:8].upper()}"
 
+push_sent: bool = False
 
 @dataclass
 class Notification:
     notification_id: str
     type: str               # SYSTEM / ALERT / INFO
+    category: Optional[str] # WATER_LEVEL / PUMP_FAILURE / ...
+    asset: Optional[str]    # TANK / PUMP / ...
     title: str
     message: str
     severity: str           # LOW / MEDIUM / HIGH / CRITICAL
+    details: Optional[Dict[str, Any]]
+    action: Optional[str]
     building_id: str
     related_task_id: Optional[str]
     created_at: str
@@ -38,21 +43,55 @@ class NotificationService:
         self,
         *,
         type: str,
+        category: Optional[str] = None,
+        asset: Optional[str] = None,
         title: str,
         message: str,
         severity: str,
+        details: Optional[Dict[str, Any]] = None,
+        action: Optional[str] = None,
         building_id: str,
         related_task_id: Optional[str] = None,
     ) -> Dict:
+        # De-duplication to avoid flooding from frequent polling across tabs.
+        # Look back through recent entries for the same logical notification.
+        now_iso = _utc_now()
+        try:
+            now = datetime.fromisoformat(now_iso)
+        except Exception:
+            now = None
+
+        for existing in reversed(self._notifications):
+            if (
+                existing.type == type
+                and existing.severity == severity
+                and existing.building_id == building_id
+                and existing.message == message
+            ):
+                if now is None:
+                    return asdict(existing)
+                try:
+                    prev = datetime.fromisoformat(existing.created_at)
+                    if abs((now - prev).total_seconds()) < 120:
+                        return asdict(existing)
+                except Exception:
+                    return asdict(existing)
+                # Older match found outside dedupe window; stop searching.
+                break
+
         notif = Notification(
             notification_id=_make_id(),
             type=type,
+            category=category,
+            asset=asset,
             title=title,
             message=message,
             severity=severity,
+            details=details,
+            action=action,
             building_id=building_id,
             related_task_id=related_task_id,
-            created_at=_utc_now(),
+            created_at=now_iso,
             read=False,
         )
         self._notifications.append(notif)

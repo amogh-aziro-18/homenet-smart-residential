@@ -7,6 +7,7 @@ from services.task_service import TaskService
 from db.session import init_db
 from services.notification_service import NotificationService
 from api.routes import alerts
+from api.routes import water_state
 
 
 app = FastAPI(title="HOMENET Water POC")
@@ -37,3 +38,4 @@ def startup():
 app.include_router(tasks.router, tags=["tasks"])
 app.include_router(assets.router, tags=["assets"])
 app.include_router(reports.router, tags=["reports"])
+app.include_router(water_state.router, tags=["water"])

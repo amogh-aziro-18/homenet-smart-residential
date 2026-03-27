@@ -41,28 +41,52 @@ def _load_model_for_asset(asset_id: str):
     return joblib.load(meta["models"][0]["model_path"]), meta
 
 
-def _demand_level(total_forecast: float) -> str:
+def _demand_level(total_forecast: float, tank_pct: float = None) -> str:
     """
-    Adjust these thresholds later when you have real data.
+    Determine demand urgency based on forecast AND current tank level.
+    
+    If tank is critically low, upgrade demand level to reflect urgency.
     """
+    # Start with forecast-based level
     if total_forecast >= 8000:
-        return "HIGH"
-    if total_forecast >= 4000:
-        return "MEDIUM"
-    return "LOW"
+        base_level = "HIGH"
+    elif total_forecast >= 4000:
+        base_level = "MEDIUM"
+    else:
+        base_level = "LOW"
+    
+    # Upgrade if tank is critically low (overrides forecast)
+    if tank_pct is not None:
+        if tank_pct < 20:
+            return "CRITICAL"  # Emergency level
+        elif tank_pct < 30:
+            # Force HIGH urgency if tank is low, even if demand forecast is low
+            if base_level == "LOW":
+                return "MEDIUM"
+            else:
+                return "HIGH"
+    
+    return base_level
 
 
-def _recommendation_text(level: str) -> str:
+def _recommendation_text(level: str, tank_pct: float = None) -> str:
+    if level == "CRITICAL":
+        return "EMERGENCY: Tank below 20%. Immediate tanker dispatch required. Switch to emergency protocols NOW."
     if level == "HIGH":
+        if tank_pct is not None and tank_pct < 30:
+            return "URGENT REFILL: Low tank level + high demand forecast. Dispatch tanker within 30 minutes to prevent service outage."
         return "Schedule tanker refill / increase pumping cycle within next 6–12 hours."
     if level == "MEDIUM":
+        if tank_pct is not None and tank_pct < 30:
+            return "Tank critically low. Refill recommended ASAP despite moderate demand forecast."
         return "Monitor demand; consider pump runtime adjustment during peak hours."
     return "Normal consumption pattern; no immediate action required."
 
 
-def forecast_water_demand(asset_id: str, horizon_hours: int) -> dict:
+def forecast_water_demand(asset_id: str, horizon_hours: int, tank_pct: float = None) -> dict:
     """
     Forecast water demand for next N hours.
+    Optionally accepts tank_pct to adjust urgency based on current tank level.
     Output format is agent-friendly and consistent.
     """
     model, meta = _load_model_for_asset(asset_id)
@@ -90,8 +114,9 @@ def forecast_water_demand(asset_id: str, horizon_hours: int) -> dict:
             }
         )
 
-    level = _demand_level(total)
-    recommendation = _recommendation_text(level)
+    # Adjust demand level based on tank percentage if provided
+    level = _demand_level(total, tank_pct=tank_pct)
+    recommendation = _recommendation_text(level, tank_pct=tank_pct)
 
     forecast_start = series[0]["timestamp"] if series else None
     forecast_end = series[-1]["timestamp"] if series else None
@@ -158,18 +183,18 @@ def pretty_print_forecast(result: dict) -> None:
 
 # ---------------------------------------------------------------------
 # ✅ BACKWARD + API COMPATIBILITY WRAPPER
-# ---------------------------------------------------------------------
-def predict_demand(building_id: str, horizon_hours: int = 24) -> dict:
+# --------------------------------------------------------------------- 
+def predict_demand(building_id: str, horizon_hours: int = 24, tank_pct: float = None) -> dict:
     """
     Wrapper so that FastAPI routes can call a consistent name:
-        predict_demand(building_id="BLD_001", horizon_hours=24)
+        predict_demand(building_id="BLD_001", horizon_hours=24, tank_pct=26)
 
     Internally uses your working:
-        forecast_water_demand(asset_id=..., horizon_hours=...)
+        forecast_water_demand(asset_id=..., horizon_hours=..., tank_pct=...)
+    
+    tank_pct: Optional. Current tank level percentage. If provided, adjusts demand urgency.
     """
-    return forecast_water_demand(asset_id=building_id, horizon_hours=horizon_hours)
-
-
+    return forecast_water_demand(asset_id=building_id, horizon_hours=horizon_hours, tank_pct=tank_pct)
 if __name__ == "__main__":
     # Change asset_id based on your trained groups (BLD_001 / BLD_002)
     out = forecast_water_demand(asset_id="BLD_001", horizon_hours=24)

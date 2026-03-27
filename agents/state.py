@@ -12,6 +12,7 @@ class AgentState(TypedDict):
     site_id: str
     pump_id: Optional[str]
     building_id: Optional[str]
+    tank_pct: Optional[float]
 
     # ML Predictions
     risk_score: Optional[float]
@@ -43,11 +44,12 @@ class AgentState(TypedDict):
     next_agent: Optional[str]
 
 
-def build_agent_state(site_id: str, pump_id: str = None, building_id: str = None) -> AgentState:
+def build_agent_state(site_id: str, pump_id: str = None, building_id: str = None, tank_pct: float = 50.0) -> AgentState:
     return {
         "site_id": site_id,
         "pump_id": pump_id,
         "building_id": building_id,
+        "tank_pct": tank_pct,
 
         "risk_score": None,
         "risk_level": None,

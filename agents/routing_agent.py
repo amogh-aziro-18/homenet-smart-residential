@@ -1,4 +1,4 @@
-﻿"""
+"""
 Routing Agent - Assigns tasks to technicians based on availability and skills
 LangGraph-safe: returns message deltas (for add_messages reducer).
 """
@@ -12,39 +12,7 @@ sys.path.insert(0, parent_dir)
 
 from agents.state import AgentState
 from langchain_core.messages import AIMessage
-
-
-# Technician database (mock)
-TECHNICIANS = {
-    "TECH_001": {
-        "name": "Technician A",
-        "skills": ["pumps", "electrical", "plumbing"],
-        "available": True,
-        "current_load": 2,
-        "max_capacity": 5,
-    },
-    "TECH_002": {
-        "name": "Technician B",
-        "skills": ["pumps", "mechanical", "sensors"],
-        "available": True,
-        "current_load": 1,
-        "max_capacity": 5,
-    },
-    "TECH_003": {
-        "name": "Technician C",
-        "skills": ["plumbing", "general"],
-        "available": False,
-        "current_load": 5,
-        "max_capacity": 5,
-    },
-    "TECH_004": {
-        "name": "Technician D",
-        "skills": ["electrical", "sensors", "diagnostics"],
-        "available": True,
-        "current_load": 0,
-        "max_capacity": 5,
-    },
-}
+from services.technician_service import load_technicians
 
 
 def get_required_skills(action_type: str) -> List[str]:
@@ -59,12 +27,16 @@ def get_required_skills(action_type: str) -> List[str]:
     return skill_map.get(action_type, ["general"])
 
 
-def assign_technician(task: Dict, required_skills: List[str]) -> Optional[str]:
+def assign_technician(
+    task: Dict,
+    required_skills: List[str],
+    technicians: Dict[str, Dict],
+) -> Optional[str]:
     """Find best available technician for a task."""
     candidates = []
 
     # Priority 1: available + skill match, lowest load wins
-    for tech_id, tech in TECHNICIANS.items():
+    for tech_id, tech in technicians.items():
         if not tech["available"]:
             continue
         if any(skill in tech["skills"] for skill in required_skills):
@@ -75,7 +47,7 @@ def assign_technician(task: Dict, required_skills: List[str]) -> Optional[str]:
         return candidates[0][0]
 
     # Priority 2: any available tech
-    for tech_id, tech in TECHNICIANS.items():
+    for tech_id, tech in technicians.items():
         if tech["available"]:
             return tech_id
 
@@ -87,6 +59,7 @@ def routing_agent_node(state: AgentState) -> Dict:
     LangGraph node: return ONLY state updates (including messages as deltas).
     """
     new_messages = [AIMessage(content="🔀 Routing Agent assigning tasks")]
+    technicians = load_technicians()
 
     tasks = state.get("tasks", [])
     existing_assignments = state.get("assignments", []) or []
@@ -100,14 +73,14 @@ def routing_agent_node(state: AgentState) -> Dict:
             continue
 
         required_skills = get_required_skills(task.get("action_type", "general"))
-        tech_id = assign_technician(task, required_skills)
+        tech_id = assign_technician(task, required_skills, technicians)
 
         if tech_id:
             assignment = {
                 "task_id": task_id,
                 "task_title": task.get("title"),
                 "technician_id": tech_id,
-                "technician_name": TECHNICIANS[tech_id]["name"],
+                "technician_name": technicians[tech_id]["name"],
                 "priority": task.get("priority"),
                 "sla_hours": task.get("sla_hours"),
                 "assigned_at": datetime.now().isoformat(),
@@ -115,13 +88,13 @@ def routing_agent_node(state: AgentState) -> Dict:
             }
             new_assignments.append(assignment)
 
-            # Update mock technician load
-            TECHNICIANS[tech_id]["current_load"] += 1
-            if TECHNICIANS[tech_id]["current_load"] >= TECHNICIANS[tech_id]["max_capacity"]:
-                TECHNICIANS[tech_id]["available"] = False
+            # Update in-memory load for current routing cycle.
+            technicians[tech_id]["current_load"] += 1
+            if technicians[tech_id]["current_load"] >= technicians[tech_id]["max_capacity"]:
+                technicians[tech_id]["available"] = False
 
             new_messages.append(
-                AIMessage(content=f"✅ Assigned {task_id} to {TECHNICIANS[tech_id]['name']}")
+                AIMessage(content=f"✅ Assigned {task_id} to {technicians[tech_id]['name']}")
             )
         else:
             assignment = {

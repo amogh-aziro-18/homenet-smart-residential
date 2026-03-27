@@ -1,0 +1,5 @@
+technician_id,name,skills,available,current_load,max_capacity
+TECH_001,Brad Pitt,"pumps,electrical,plumbing",true,2,5
+TECH_002,Tom Cruise,"pumps,mechanical,sensors",true,1,5
+TECH_003,Leo DiCaprio,"plumbing,general",false,5,5
+TECH_004,Cilian Murphy,"electrical,sensors,diagnostics",true,0,5

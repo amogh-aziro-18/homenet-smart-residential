@@ -1,4 +1,4 @@
-﻿"""
+"""
 Forecast Agent - LLM-powered demand forecasting analysis with LangGraph
 INTEGRATED WITH AMOGH'S ML MODEL
 """
@@ -62,6 +62,7 @@ def forecast_agent_node(state: AgentState) -> dict:
             "forecast_total": forecast_total,
             "demand_level": demand_level,
             "ml_recommendation": recommendation,
+            "ml_forecast_raw": ml_forecast,
         })
         
         # Use LLM for intelligent reasoning based on REAL ML data
@@ -205,6 +206,7 @@ def run_forecast_agent(building_id: str) -> dict:
         "forecast_total": merged.get("forecast_total"),
         "demand_level": merged.get("demand_level"),
         "ml_recommendation": merged.get("ml_recommendation"),
+        "ml_forecast_raw": merged.get("ml_forecast_raw"),
         "action_required": merged.get("action_required"),
         "action_type": merged.get("action_type"),
         "priority": merged.get("priority"),

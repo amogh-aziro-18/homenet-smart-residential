@@ -58,15 +58,15 @@ def build_workflow():
         {"maintenance": "maintenance", "routing": "routing", "end": END},
     )
 
-    workflow.add_edge("maintenance", "supervisor")
+    workflow.add_edge("maintenance", "routing")
     workflow.add_edge("routing", END)
 
     return workflow.compile()
 
 
-def run_langgraph_workflow(pump_id: str):
+def run_langgraph_workflow(pump_id: str, tank_pct: float = 50.0):
     app = build_workflow()
-    initial_state = build_agent_state(site_id="SITE_001", pump_id=pump_id)
+    initial_state = build_agent_state(site_id="SITE_001", pump_id=pump_id, tank_pct=tank_pct)
     return app.invoke(initial_state)
 
 
