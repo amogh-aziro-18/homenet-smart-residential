@@ -2,7 +2,7 @@
  * Backend base URL — set this to your dev machine LAN IP when testing on a device.
  * Wrong IP → failed fetch → dashboard shows 0%.
  */
-export const API_BASE_URL = "http://192.168.2.208:8000";
+export const API_BASE_URL = "http://192.168.2.182:8000";
 
 export async function getForecast() {
   const res = await fetch(`${API_BASE_URL}/forecast/BLD_001`);

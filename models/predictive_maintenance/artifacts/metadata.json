@@ -1,0 +1,31 @@
+{
+  "features": [
+    "vibration_mm_s",
+    "temperature_celsius",
+    "current_amps",
+    "flow_rate_lpm",
+    "pressure_psi",
+    "vibration_rolling_mean_24h",
+    "vibration_rolling_std_24h",
+    "vibration_rolling_max_24h",
+    "temp_rolling_mean_24h",
+    "temp_rolling_std_24h",
+    "temp_rolling_max_24h",
+    "current_rolling_mean_24h",
+    "current_rolling_std_24h",
+    "vibration_change",
+    "temp_change",
+    "vibration_lag_12h",
+    "temp_lag_12h",
+    "vib_temp_interaction",
+    "vibration_above_threshold",
+    "temp_above_threshold"
+  ],
+  "model_type": "XGBoost",
+  "n_features": 20,
+  "train_samples": 2147,
+  "test_recall": 1.0,
+  "test_precision": 0.95,
+  "test_f1": 0.9743589743589743,
+  "trained_date": "2026-03-30 17:14:35"
+}
