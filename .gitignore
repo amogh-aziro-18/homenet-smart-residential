@@ -72,3 +72,4 @@ water-app/.pnp.*
 
 # Keep sample data tracked
 !data/samples/*.csv
+data/realtime/
